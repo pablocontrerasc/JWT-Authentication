@@ -1,0 +1,44 @@
+body{
+    background-color: #e9ecef;
+   
+}
+
+
+.login-container{
+    margin-bottom: 5%;
+
+}
+.login-form-1{
+    padding: 5%;
+    box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.1), 0 9px 26px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 30px;
+    background-color: white;
+}
+.login-form-1 h3{
+    text-align: center;
+    color: #333;
+}
+
+.login-container form{
+    padding: 10%;
+}
+
+label{
+    color:  #3ca8f8  ;
+    font-size: 15px;
+    font-family: "Montserrat";
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.registro{
+    padding-top: 50px;
+}
+
+.btnRegistrarse{
+    padding-top: 10px;
+}
+
+.btnEntrar{
+    padding-top: 10px;
+}
