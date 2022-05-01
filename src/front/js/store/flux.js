@@ -2,7 +2,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
 			message: null,
-			token:null,
+			token: null,
 			demo: [
 				{
 					title: "FIRST",
@@ -23,11 +23,20 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 
 			getMessage: () => {
-				// fetching data from the backend
-				fetch(process.env.BACKEND_URL + "/api/hello")
-					.then(resp => resp.json())
-					.then(data => setStore({ message: data.message }))
-					.catch(error => console.log("Error loading message from backend", error));
+				const store = getStore();
+				const opciones = {
+					headers: {
+						Authorization: "Bearer " + store.token,
+					},
+				};
+				fetch(`${process.env.BACKEND_URL}/api/hello`, opciones)
+					.then((resp) => resp.json())
+					.then((data) => setStore({ message: data.message }))
+
+					.catch((error) =>
+						console.log("Error loading message from backend", error)
+					);
+
 			},
 			changeColor: (index, color) => {
 				//get the store
@@ -43,28 +52,77 @@ const getState = ({ getStore, getActions, setStore }) => {
 				//reset the global store
 				setStore({ demo: demo });
 			},
-			 login : async (email, password) => {
-				const resp = await fetch(`${process.env.BACKEND_URL}/login`, { 
-					 method: "POST",
-					 headers: { "Content-Type": "application/json" },
-					 body: JSON.stringify({ email: email, password: password }) 
-				})
-		   
-				if(!resp.ok) throw Error("There was a problem in the login request")
-		   
-				if(resp.status === 401){
-					 throw("Invalid credentials")
+			login: async (email, password) => {
+				const opciones = {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						email: email,
+						password: password,
+					}),
+				};
+				try {
+					const resp = await fetch(
+						`${process.env.BACKEND_URL}/api/login`,
+						opciones
+					);
+					if (resp.status !== 200) {
+						throw new Error("ERROR en respuesta", Error);
+					}
+					const data = await resp.json();
+					console.log("Informacion desde backend", data);
+					sessionStorage.setItem("token", data.token);
+					console.log(data, "accestoken")
+					setStore({ token: data.token });
+					return data;
+				} catch (error) {
+					console.error(`Login error: ${error}`);
 				}
-				else if(resp.status === 400){
-					 throw ("Invalid email or password format")
+			},
+			sincronizarTokenParaSessionStrore: () => {
+				const token = sessionStorage.getItem("token");
+				console.log("aplicacion sincronizada desde session Storage token");
+				if (token && token != "" && token != undefined)
+					setStore({ token: token });
+			},
+
+			logout: () => {
+				sessionStorage.removeItem("token");
+				sessionStorage.clear();
+
+				console.log("Cerrar sesion");
+				setStore({ token: null });
+				setStore({ message: null })
+			},
+			registrarse: async (email, password) => {
+				const opciones = {
+				  method: "POST",
+				  headers: {
+					"Content-Type": "application/json",
+				  },
+				  body: JSON.stringify({
+					email: email,
+					password: password
+				  }),
+				};
+				try {
+				  const resp = await fetch(
+					`${process.env.BACKEND_URL}/api/singup`,
+					opciones
+				  );
+				  if (resp.status != 200) {
+					throw new Error("ERROR en respuesta", Error);
+				  }
+				  const data = await resp.json();
+				  console.log("Informacion desde backend", data);
+				  setStore({ data: data });
+				  return data;
+				} catch (error) {
+				  console.error(`New user error: ${error}`);
 				}
-				const data = await resp.json()
-				// save your token in the localStorage
-			   //also you should set your user into the store using the setStore function
-				localStorage.setItem("jwt-token", data.token);
-		   
-				return data
-		   }
+			  },
 		}
 	};
 };
